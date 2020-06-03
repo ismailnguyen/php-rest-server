@@ -8,7 +8,7 @@
 		const UNAUTHORIZED = 401;
 		const FORBIDDEN = 403;
 		const NOT_FOUND = 404;
-		const NOT_ALOWED = 405;
+		const NOT_ALLOWED = 405;
 		const NOT_ACCEPTABLE = 406;
 		const CONFLICT = 409;
 		const PRECONDITION_FAILED = 412;
