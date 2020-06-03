@@ -1,14 +1,16 @@
 <?php
 	require_once "http_constants.php";
 	
-	class ControllerBase
+	abstract class ControllerBase
 	{
 		private $responseCode = Http::HTTP_OK; // Response code
 		private $responseData = array(); // Response datas
 		private $requestData = array(); // Request datas
 		private $outputFormat; // Output format: xml, json
+		
+		protected $authentication = array(); // Authentication datas (username, and password) if provided
 
-		public function __construct()
+		public function __construct($useAuthentifaction=!USE_AUTHENTICATION)
 		{
 			try
 			{
@@ -17,6 +19,9 @@
 				$this->outputFormat = ($this->getRequest("output") != null && $this->getRequest("output") == XML_FORMAT)
 										? XML_FORMAT
 										: JSON_FORMAT;
+										
+				if ($useAuthentifaction)
+					$this->handleAuthentication();
 			}
 			catch(Exception $e)
 			{
@@ -24,6 +29,25 @@
 				$this->setCode(Http::SERVICE_UNAVAILABLE);
 				$this->response();
 			}
+		}
+		
+		/*
+		 * Concrete class should override this method to handle authentification if needed
+		 *
+		*/
+		protected function isAuthenticationValid()
+		{
+			return false;
+		}			
+		
+		private function handleAuthentication()
+		{
+			if ($this->isAuthenticationValid())
+				return;
+			
+			$this->addData(array("msg" => "Invalid authentication"));
+			$this->setCode(Http::UNAUTHORIZED);
+			$this->response();
 		}
 
 		public function addData($data)
@@ -59,6 +83,12 @@
 		{
 			try
 			{
+				if(isset($_SERVER['PHP_AUTH_USER']))
+					$this->authentication["username"] = $_SERVER['PHP_AUTH_USER'];
+				
+				if(isset($_SERVER['PHP_AUTH_PW']))
+					$this->authentication["password"] = $_SERVER['PHP_AUTH_PW'];
+			
 				$this->requestData["method"] = $_SERVER['REQUEST_METHOD'];
 				
 				if($this->requestData["method"] == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER))

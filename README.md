@@ -37,5 +37,16 @@ class MyController extends BaseController
 			$this->response();
 		}
 	}
+	
+	// Override this method to handle http authentication
+	protected function isAuthenticationValid()
+	{
+		// ...
+		// your logic to check authentication using 
+		
+		// authentication username and password are available through those variables:
+		// username : $this->authentication["username"]
+		// password : $this->authentication["password"]
+	}
 }
 ```
